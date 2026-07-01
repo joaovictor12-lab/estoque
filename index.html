@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Estoque</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f9; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #333; }
+        form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .full-width { grid-column: span 2; }
+        label { font-weight: bold; margin-bottom: 5px; display: block;}
+        input, select, button { padding: 10px; width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #218838; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #007bff; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📦 Gestão de Estoque</h1>
+
+    <form id="estoqueForm">
+        <div class="full-width">
+            <label for="nome">Nome do Produto</label>
+            <input type="text" id="nome" placeholder="Ex: Bota Texana Feminina" required>
+        </div>
+        
+        <div>
+            <label for="modelo">Variação / Modelo</label>
+            <input type="text" id="modelo" placeholder="Ex: Couro Rústico com Bordado" required>
+        </div>
+
+        <div>
+            <label for="tamanho">Numeração</label>
+            <select id="tamanho" required>
+                <option value="">Selecione o tamanho</option>
+                <option value="34">34</option>
+                <option value="35">35</option>
+                <option value="36">36</option>
+                <option value="37">37</option>
+                <option value="38">38</option>
+                <option value="39">39</option>
+            </select>
+        </div>
+
+        <div class="full-width">
+            <label for="quantidade">Quantidade de Pares</label>
+            <input type="number" id="quantidade" min="1" placeholder="0" required>
+        </div>
+
+        <div class="full-width">
+            <button type="submit">Cadastrar no Estoque</button>
+        </div>
+    </form>
+
+    <h2>Inventário Atual</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Modelo</th>
+                <th>Tamanho</th>
+                <th>Quantidade</th>
+            </tr>
+        </thead>
+        <tbody id="tabelaEstoque">
+            </tbody>
+    </table>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:3000/api/estoque';
+
+    // Função para buscar e exibir os dados do banco
+    async function carregarEstoque() {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        const tbody = document.getElementById('tabelaEstoque');
+        tbody.innerHTML = '';
+
+        data.estoque.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${item.nome}</td>
+                <td>${item.modelo}</td>
+                <td>${item.tamanho}</td>
+                <td><strong>${item.quantidade}</strong></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Função para enviar os dados do formulário para o banco
+    document.getElementById('estoqueForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const nome = document.getElementById('nome').value;
+        const modelo = document.getElementById('modelo').value;
+        const tamanho = document.getElementById('tamanho').value;
+        const quantidade = document.getElementById('quantidade').value;
+
+        await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome, modelo, tamanho, quantidade })
+        });
+
+        alert('Produto cadastrado no estoque!');
+        document.getElementById('estoqueForm').reset();
+        carregarEstoque(); // Atualiza a tabela na tela
+    });
+
+    // Carrega o estoque ao abrir a página
+    carregarEstoque();
+</script>
+
+</body>
+</html>
