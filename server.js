@@ -6,6 +6,13 @@ const cors = require('cors');
 const app = express();
 app.use(express.json());
 app.use(cors());
+const path = require('path');
+
+app.use(express.static(__dirname));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // Inicializa o banco de dados SQLite
 const db = new sqlite3.Database('./estoque.db', (err) => {
@@ -80,7 +87,8 @@ app.get('/api/estoque', (req, res) => {
     });
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta http://localhost:${PORT}`);
+    console.log(`Servidor rodando na porta ${PORT}`);
 });
